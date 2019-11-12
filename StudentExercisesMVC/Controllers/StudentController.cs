@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using StudentExercisesMVC.Models;
+using StudentExercisesMVC.Models.ViewModels;
 
 namespace StudentExercisesMVC.Controllers
 {
@@ -74,17 +75,62 @@ namespace StudentExercisesMVC.Controllers
         // GET: Student/Create
         public ActionResult Create()
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT Id, Name FROM Cohort";
+                    var reader = cmd.ExecuteReader();
+
+                    var cohorts = new List<Cohort>();
+                    while (reader.Read())
+                    {
+                        cohorts.Add(
+                                new Cohort()
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    Name = reader.GetString(reader.GetOrdinal("Name")),
+                                }
+                            );
+                    }
+
+                    reader.Close();
+
+                    var viewModel = new StudentCreateViewModel()
+                    {
+                        Cohorts = cohorts
+                    };
+
+                    return View(viewModel);
+                }
+            }
         }
 
         // POST: Student/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(StudentCreateViewModel viewModel)
         {
             try
             {
-                // TODO: Add insert logic here
+                var newStudent = viewModel.Student;
+
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @" INSERT INTO Student (FirstName, LastName, SlackHandle, CohortId)
+                                                VALUES (@firstName, @lastName, @slackHandle, @cohortId);";
+                        cmd.Parameters.Add(new SqlParameter("@firstName", newStudent.FirstName));
+                        cmd.Parameters.Add(new SqlParameter("@lastName", newStudent.LastName));
+                        cmd.Parameters.Add(new SqlParameter("@slackHandle", newStudent.SlackHandle));
+                        cmd.Parameters.Add(new SqlParameter("@cohortId", newStudent.CohortId));
+
+                        cmd.ExecuteNonQuery();
+                    }
+                } 
 
                 return RedirectToAction(nameof(Index));
             }
@@ -136,7 +182,9 @@ namespace StudentExercisesMVC.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"DELETE FROM Student WHERE id = @id";
+                        cmd.CommandText = @"
+                            DELETE FROM StudentExercise WHERE StudentId = @id;
+                            DELETE FROM Student WHERE id = @id;";
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         cmd.ExecuteNonQuery();

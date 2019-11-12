@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using StudentExercisesMVC.Models;
+using StudentExercisesMVC.Models.ViewModels;
 
 namespace StudentExercisesMVC.Controllers.API
 {
@@ -36,30 +37,26 @@ namespace StudentExercisesMVC.Controllers.API
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT s.id, s.firstname, s.lastname, 
-                                               s.slackhandle, s.cohortId,
-                                               c.name as cohortname
-                                         FROM Student s INNER JOIN Cohort c on c.id = s.cohortid
-                                        WHERE c.id = @id";
+                    cmd.CommandText = @"SELECT s.id, s.firstname, s.lastname, s.slackhandle,
+                                               COUNT(se.id) AS ExerciseCount
+                                          fROM Student s
+                                               left join StudentExercise se on s.id = se.StudentId
+                                         WHERE s.cohortId = @id
+                                      GROUP BY s.id, s.FirstName, s.LastName, s.SlackHandle";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     var reader = cmd.ExecuteReader();
 
-                    var students = new List<Student>();
+                    var students = new List<StudentExerciseCount>();
                     while (reader.Read())
                     {
                         students.Add(
-                            new Student
+                            new StudentExerciseCount
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("id")),
                                 FirstName = reader.GetString(reader.GetOrdinal("firstname")),
                                 LastName = reader.GetString(reader.GetOrdinal("lastname")),
                                 SlackHandle = reader.GetString(reader.GetOrdinal("slackhandle")),
-                                CohortId = reader.GetInt32(reader.GetOrdinal("cohortId")),
-                                Cohort = new Cohort()
-                                {
-                                    Id = reader.GetInt32(reader.GetOrdinal("cohortId")),
-                                    Name = reader.GetString(reader.GetOrdinal("cohortname")),
-                                }
+                                ExerciseCount = reader.GetInt32(reader.GetOrdinal("ExerciseCount")),
                             });
                     }
 

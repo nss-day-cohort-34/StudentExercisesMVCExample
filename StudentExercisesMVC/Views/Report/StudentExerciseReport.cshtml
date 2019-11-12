@@ -17,24 +17,35 @@
     </select>
 </div>
 <div class="row">
-    <div id="output"></div>
+    <canvas id="output"></canvas>
 </div>
 
 @section scripts {
+<script src="~/lib/chart.js/dist/Chart.bundle.min.js"></script>
 <script src="~/js/report.js"></script>
 <script>
     const cohortSelect = document.getElementById('cohort-select');
-    const output = document.getElementById('output');
+    const output = document.getElementById('output').getContext('2d');
+    let chart = null;
 
     cohortSelect.addEventListener("change", (evt) => {
+        if (chart) {
+            chart.destroy();
+        }
+
         ReportManager
             .getStudentsInCohort(evt.target.value)
             .then(students => {
-                const html = students.map(student =>
-                    `<div>${student.firstName} ${student.lastName}</div>
-                     <div>${student.slackHandle}</div>`
-                ).join('');
-                output.innerHTML = html;
+                chart = new Chart(output, {
+                    type: 'bar',
+                    data: {
+                        labels: students.map(s => `${s.firstName} ${s.lastName}`),
+                        datasets: [{
+                            label: "Exercise Count",
+                            data: students.map(s => s.exerciseCount)
+                        }]
+                    }
+                });
             });
     });
 </script>

@@ -1,0 +1,19 @@
+﻿@model System.Collections.Generic.List<Student>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome To My Site</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+    @for (int i = 0; i < 4; i++)
+    {
+        <div>Hi @i</div>
+    }
+
+    @foreach(Student aStudent in Model)
+    {
+        <div>@aStudent.FirstName @aStudent.LastName</div>
+    }
+</div>

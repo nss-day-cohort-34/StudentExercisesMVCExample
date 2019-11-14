@@ -11,12 +11,6 @@
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Id)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Id)
-        </dd>
-        <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.FirstName)
         </dt>
         <dd class = "col-sm-10">
@@ -38,11 +32,12 @@
             @Html.DisplayNameFor(model => model.CohortId)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CohortId)
+            @Html.DisplayFor(model => model.Cohort.Name)
         </dd>
     </dl>
 </div>
 <div>
-    @Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Delete", "Delete", new { id = Model.Id }) |
     <a asp-action="Index">Back to List</a>
 </div>

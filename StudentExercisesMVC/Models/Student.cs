@@ -10,6 +10,7 @@ namespace StudentExercisesMVC.Models
     {
         public int Id { get; set; }
 
+        [Required]
         [Display(Name = "First Name")]
         public string FirstName { get; set; }
 
@@ -23,5 +24,7 @@ namespace StudentExercisesMVC.Models
         public int CohortId { get; set; }
 
         public Cohort Cohort { get; set; }
+
+        public List<Exercise> Exercises { get; set; } = new List<Exercise>();
     }
 }

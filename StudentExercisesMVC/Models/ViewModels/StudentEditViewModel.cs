@@ -9,18 +9,33 @@ namespace StudentExercisesMVC.Models.ViewModels
     public class StudentEditViewModel
     {
         public Student Student { get; set; }
-        public List<Cohort> Cohorts { get; set; } = new List<Cohort>();
+        public List<Cohort> AllCohorts { get; set; } = new List<Cohort>();
+
+        public List<Exercise> AllExercises { get; set; } = new List<Exercise>();
+        public List<int> SelectedExerciseIds { get; set; } = new List<int>();
 
         public List<SelectListItem> CohortOptions
         {
             get
             {
-                if (Cohorts == null) return null;
+                if (AllCohorts == null) return null;
 
-                return Cohorts
+                return AllCohorts
                     .Select(c => new SelectListItem(c.Name, c.Id.ToString()))
                     .ToList();
             }
         }
-    }
+
+        public List<SelectListItem> ExerciseOptions
+        {
+            get
+            {
+                if (AllExercises == null) return null;
+
+                return AllExercises
+                    .Select(e => new SelectListItem($"{e.Name} ({e.Language})", e.Id.ToString()))
+                    .ToList();
+            }
+        }
+     }
 }

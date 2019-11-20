@@ -1,40 +1,50 @@
-﻿@model IEnumerable<StudentExercisesMVC.Models.Cohort>
+﻿@model StudentExerciseReportViewModel
 
 @{
-    ViewData["Title"] = "StudentExerciseReport";
+    ViewData["Title"] = "Student Exercise Report";
 }
 
 <h1>Student Exercise Report</h1>
 
 <div class="row">
     <label for="cohort-select">Cohort</label>
-    <select id="cohort-select">
-        <option>Select a Cohort...</option>
-        @foreach(var cohort in Model)
-        {
-            <option value="@cohort.Id">@cohort.Name</option>
-        }
-    </select>
+    <select id="cohort-select" asp-items="@Model.CohortOptions"></select>
 </div>
 <div class="row">
     <canvas id="output"></canvas>
 </div>
 
+@* It's all javascript below this line. Remember this code runs on the client. *@
 @section scripts {
-<script src="~/lib/chart.js/dist/Chart.bundle.min.js"></script>
-<script src="~/js/report.js"></script>
+
+@* 
+    Pull in the chart.js library from a Content Delivery Network (CDN) 
+    
+    Chart.js documentation
+    https://www.chartjs.org/docs/latest/getting-started/
+*@
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 <script>
+
+    function getStudentsInCohort(cohortId) {
+        // Hit the API running in our .net app
+        return fetch(`/api/StudentExerciseReportAPI/${cohortId}`)
+            .then(resp => resp.json());
+    }
+
     const cohortSelect = document.getElementById('cohort-select');
     const output = document.getElementById('output').getContext('2d');
     let chart = null;
 
     cohortSelect.addEventListener("change", (evt) => {
+        // If we already have a chart, destroy it to make room for the next one.
         if (chart) {
             chart.destroy();
         }
 
-        ReportManager
-            .getStudentsInCohort(evt.target.value)
+        const selectedCohortId = evt.target.value;
+
+        getStudentsInCohort(selectedCohortId)
             .then(students => {
                 chart = new Chart(output, {
                     type: 'bar',

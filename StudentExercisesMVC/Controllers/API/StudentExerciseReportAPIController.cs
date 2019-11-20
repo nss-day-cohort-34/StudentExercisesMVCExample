@@ -13,7 +13,7 @@ namespace StudentExercisesMVC.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReportDataController : ControllerBase
+    public class StudentExerciseReportAPIController : ControllerBase
     {
         private string _connectionString;
         private SqlConnection Connection
@@ -24,13 +24,13 @@ namespace StudentExercisesMVC.Controllers.API
             }
         }
 
-        public ReportDataController(IConfiguration config)
+        public StudentExerciseReportAPIController(IConfiguration config)
         {
             _connectionString = config.GetConnectionString("DefaultConnection");
         }
 
-        [HttpGet("GetStudentsByCohortId/{id:int}", Name = "GetStudentsByCohortId")]
-        public async Task<IActionResult> GetStudentsByCohortId(int id)
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> Get(int id)
         {
             using (SqlConnection conn = Connection)
             {
